@@ -138,6 +138,12 @@ static const struct {
     },
     {
         .stage = UpdateTaskStageRadioBusy,
+        .percent_min = 12,
+        .percent_max = 12,
+        .descr = "FW too big for radio",
+    },
+    {
+        .stage = UpdateTaskStageRadioBusy,
         .percent_min = 11,
         .percent_max = 20,
         .descr = "C2 FUS switch failed",

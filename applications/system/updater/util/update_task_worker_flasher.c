@@ -46,11 +46,61 @@ static bool check_address_boundaries(const size_t address) {
     return (address >= min_allowed_address) && (address < max_allowed_address);
 }
 
+/* Highest page written by the last DFU write, to clean up behind it */
+static int16_t update_task_dfu_last_page = -1;
+
 static bool update_task_flash_program_page(
     const uint8_t i_page,
     const uint8_t* update_block,
     uint16_t update_block_len) {
     furi_hal_flash_program_page(i_page, update_block, update_block_len);
+    update_task_dfu_last_page = MAX(update_task_dfu_last_page, (int16_t)i_page);
+    return true;
+}
+
+static bool update_task_flash_is_blank(size_t start, size_t end) {
+    for(size_t address = start; address < end; address += sizeof(uint32_t)) {
+        if(*(const volatile uint32_t*)address != 0xFFFFFFFF) {
+            return false;
+        }
+    }
+    return true;
+}
+
+/* Erase what an older, bigger firmware left between the new image and the radio
+ * stack, so that update_task_radio_region_is_free() can trust blank flash */
+static void update_task_erase_free_flash(void) {
+    const size_t page_size = furi_hal_flash_get_page_size();
+    const int16_t end_page =
+        furi_hal_flash_get_page_number((size_t)furi_hal_flash_get_free_end_address());
+    // Cleanup only: never fail the update over it
+    if(update_task_dfu_last_page < 0 || end_page <= 0) {
+        FURI_LOG_W(TAG, "Skipping free flash cleanup");
+        return;
+    }
+
+    for(int16_t page = update_task_dfu_last_page + 1; page < end_page; page++) {
+        const size_t page_addr = furi_hal_flash_get_base() + page_size * page;
+        if(!update_task_flash_is_blank(page_addr, page_addr + page_size)) {
+            FURI_LOG_I(TAG, "Erasing stale page %d", page);
+            furi_hal_flash_erase(page);
+        }
+    }
+}
+
+/* Every reboot during a radio update runs the firmware that is installed now.
+ * A new stack that starts below the current one must not overwrite it */
+static bool update_task_radio_region_is_free(UpdateTask* update_task) {
+    const size_t start = update_task->manifest->radio_address;
+    const size_t end = (size_t)furi_hal_flash_get_free_end_address();
+    if(!update_task_flash_is_blank(start, end)) {
+        FURI_LOG_E(
+            TAG,
+            "Radio region %08X-%08X is not blank: installed firmware too big for this stack",
+            start,
+            end);
+        return false;
+    }
     return true;
 }
 
@@ -77,12 +127,15 @@ static bool update_task_write_dfu(UpdateTask* update_task) {
         }
 
         update_task_set_progress(update_task, UpdateTaskStageFlashWrite, 0);
+        update_task_dfu_last_page = -1;
         CHECK_RESULT(dfu_file_process_targets(&page_task, update_task->file, valid_targets));
 
         page_task.task_cb = &page_task_compare_flash;
 
         update_task_set_progress(update_task, UpdateTaskStageFlashValidate, 0);
         CHECK_RESULT(dfu_file_process_targets(&page_task, update_task->file, valid_targets));
+
+        update_task_erase_free_flash();
         success = true;
     } while(false);
 
@@ -201,6 +254,10 @@ static bool update_task_manage_radiostack(UpdateTask* update_task) {
                 break;
             } else {
                 /* Version or type mismatch. Let's boot to FUS and start updating. */
+                /* Last point where giving up leaves the device bootable */
+                update_task_set_progress(update_task, UpdateTaskStageRadioBusy, 12);
+                CHECK_RESULT(update_task_radio_region_is_free(update_task));
+
                 FURI_LOG_W(TAG, "Restarting to FUS");
                 furi_hal_rtc_set_flag(FuriHalRtcFlagC2Update);
                 update_task_set_progress(update_task, UpdateTaskStageProgress, 20);
