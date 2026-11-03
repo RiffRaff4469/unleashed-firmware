@@ -19,7 +19,8 @@ DEBUG = 1
 DIST_SUFFIX = "local"
 
 # Coprocessor firmware
-COPRO_OB_DATA = "scripts/ob.data"
+# Full stack moves SFSA (0xD7 -> 0xCE), so use the OB set that does not pin it
+COPRO_OB_DATA = "scripts/ob_custradio.data"
 
 # Must match lib/stm32wb_copro version
 COPRO_CUBE_VERSION = "1.20.0"
@@ -27,12 +28,14 @@ COPRO_CUBE_VERSION = "1.20.0"
 COPRO_CUBE_DIR = "lib/stm32wb_copro"
 
 # Default radio stack
-COPRO_STACK_BIN = "stm32wb5x_BLE_Stack_light_fw.bin"
-# Firmware also supports "ble_full", but it might not fit into debug builds
-COPRO_STACK_TYPE = "ble_light"
+# Full stack: central/observer roles. Installs at 0x080CE000 on 1M parts (copro 1.20.0
+# release notes), so firmware must stay below 843776 bytes. Does not fit debug builds.
+COPRO_STACK_BIN = "stm32wb5x_BLE_Stack_full_fw.bin"
+COPRO_STACK_TYPE = "ble_full"
 
-# Leave 0 to let scripts automatically calculate it
-COPRO_STACK_ADDR = "0x0"
+# Full stack 1.20.0 on a 1M WB55, from lib/stm32wb_copro/firmware/Release_Notes.html.
+# Re-verify after any copro update. Set to "0x0" to let scripts calculate it.
+COPRO_STACK_ADDR = "0x080CE000"
 
 # If you override COPRO_CUBE_DIR on commandline, override this as well
 COPRO_STACK_BIN_DIR = posixpath.join(COPRO_CUBE_DIR, "firmware")
