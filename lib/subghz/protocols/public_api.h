@@ -394,6 +394,12 @@ bool subghz_protocol_decoder_nice_flor_s_is_o_code_no_ic(void* context);
  */
 uint64_t subghz_protocol_nice_flor_s_decrypt_ic(uint64_t data, uint16_t ic, const char* file_name);
 
+/**
+ * Reset FAAC SLH programming mode state.
+ * Needed by the Sub-GHz app now that it is built as an external app.
+ */
+void faac_slh_reset_prog_mode(void);
+
 #ifdef __cplusplus
 }
 #endif

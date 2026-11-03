@@ -1,7 +1,8 @@
 App(
     appid="subghz",
     name="Sub-GHz",
-    apptype=FlipperAppType.APP,
+    # Loaded from SD so the firmware fits below the full BLE stack (see ble_full notes)
+    apptype=FlipperAppType.MENUEXTERNAL,
     targets=["f7"],
     cdefines=["APP_SUBGHZ"],
     entry_point="subghz_app",
@@ -37,7 +38,8 @@ App(
     appid="subghz_load_dangerous_settings",
     apptype=FlipperAppType.STARTUP,
     entry_point="subghz_dangerous_freq",
-    requires=["storage", "subghz"],
+    requires=["storage"],
+    sources=["subghz_dangerous_freq.c", "subghz_last_settings.c"],
     order=650,
 )
 
