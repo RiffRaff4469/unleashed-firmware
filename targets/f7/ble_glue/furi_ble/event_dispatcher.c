@@ -2,6 +2,7 @@
 #include <core/check.h>
 #include <furi.h>
 #include <ble/ble.h>
+#include <gap_central.h>
 
 #include <m-list.h>
 
@@ -18,6 +19,12 @@ static bool initialized = false;
 BleEventFlowStatus ble_event_dispatcher_process_event(void* payload) {
     furi_check(initialized);
 
+    /* Client-mode events: scan reports and central links. Before the services, so
+     * events on central links never reach handlers written for the peripheral link */
+    if(gap_central_process_event(payload)) {
+        return BleEventFlowEnable;
+    }
+
     GapSvcEventHandlerList_it_t it;
     BleEventAckStatus ack_status = BleEventNotAck;
 
@@ -32,8 +39,6 @@ BleEventFlowStatus ble_event_dispatcher_process_event(void* payload) {
             break;
         }
     }
-
-    /* Handlers for client-mode events are also to be implemented here. But not today. */
 
     /* Now, decide on a flow control action based on results of all handlers */
     switch(ack_status) {

@@ -1,4 +1,5 @@
 #include "gap.h"
+#include "gap_central.h"
 
 #include "app_common.h"
 #include <core/mutex.h>
@@ -356,10 +357,15 @@ static void gap_init_svc(Gap* gap, const GapRootSecurityKeys* root_keys) {
     // Initialize GATT interface
     aci_gatt_init();
     // Initialize GAP interface
+    // Full stack adds central and observer roles, light stack is peripheral only
+    uint8_t role = GAP_PERIPHERAL_ROLE;
+    if(furi_hal_bt_get_radio_stack() == FuriHalBtStackFull) {
+        role |= GAP_CENTRAL_ROLE | GAP_OBSERVER_ROLE;
+    }
     // Skip first symbol AD_TYPE_COMPLETE_LOCAL_NAME
     char* name = gap->service.adv_name + 1;
     aci_gap_init(
-        GAP_PERIPHERAL_ROLE,
+        role,
         0,
         strlen(name),
         &gap->service.gap_svc_handle,
@@ -550,6 +556,7 @@ bool gap_init(
     // Initialization of GATT & GAP layer
     gap->service.adv_name = config->adv_name;
     gap_init_svc(gap, root_keys);
+    gap_central_init();
     ble_event_dispatcher_init();
     // Initialization of the GAP state
     gap->state_mutex = furi_mutex_alloc(FuriMutexTypeNormal);
@@ -625,6 +632,7 @@ void gap_thread_stop(void) {
         furi_timer_free(gap->advertise_timer);
         gap->advertise_timer = NULL;
 
+        gap_central_reset();
         ble_event_dispatcher_reset();
         free(gap);
         gap = NULL;

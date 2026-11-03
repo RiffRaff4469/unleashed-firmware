@@ -297,6 +297,7 @@ Header,+,targets/f7/ble_glue/profiles/serial_profile.h,,
 Header,+,targets/f7/ble_glue/services/battery_service.h,,
 Header,+,targets/f7/ble_glue/services/dev_info_service.h,,
 Header,+,targets/f7/ble_glue/services/serial_service.h,,
+Header,+,targets/f7/furi_hal/furi_hal_bt_central.h,,
 Header,+,targets/f7/furi_hal/furi_hal_bus.h,,
 Header,+,targets/f7/furi_hal/furi_hal_clock.h,,
 Header,+,targets/f7/furi_hal/furi_hal_dma.h,,
@@ -1448,6 +1449,18 @@ Function,+,furi_hal_adc_convert_vref,float,"FuriHalAdcHandle*, uint16_t"
 Function,+,furi_hal_adc_init,void,
 Function,+,furi_hal_adc_read,uint16_t,"FuriHalAdcHandle*, FuriHalAdcChannel"
 Function,+,furi_hal_adc_release,void,FuriHalAdcHandle*
+Function,+,furi_hal_bt_central_connect,_Bool,"GapAddressType, const uint8_t*"
+Function,+,furi_hal_bt_central_connect_cancel,_Bool,
+Function,+,furi_hal_bt_central_disconnect,_Bool,uint16_t
+Function,+,furi_hal_bt_central_discover_characteristics,_Bool,"uint16_t, uint16_t, uint16_t"
+Function,+,furi_hal_bt_central_discover_descriptors,_Bool,"uint16_t, uint16_t, uint16_t"
+Function,+,furi_hal_bt_central_discover_services,_Bool,uint16_t
+Function,+,furi_hal_bt_central_exchange_mtu,_Bool,uint16_t
+Function,+,furi_hal_bt_central_is_supported,_Bool,
+Function,+,furi_hal_bt_central_read,_Bool,"uint16_t, uint16_t"
+Function,+,furi_hal_bt_central_set_callback,void,"GapCentralEventCallback, void*"
+Function,+,furi_hal_bt_central_subscribe,_Bool,"uint16_t, uint16_t, _Bool, _Bool"
+Function,+,furi_hal_bt_central_write,_Bool,"uint16_t, uint16_t, const uint8_t*, uint8_t, _Bool"
 Function,+,furi_hal_bt_change_app,FuriHalBleProfileBase*,"const FuriHalBleProfileTemplate*, FuriHalBleProfileParams, const GapRootSecurityKeys*, GapEventCallback, void*"
 Function,+,furi_hal_bt_check_profile_type,_Bool,"FuriHalBleProfileBase*, const FuriHalBleProfileTemplate*"
 Function,+,furi_hal_bt_clear_white_list,_Bool,
@@ -1473,6 +1486,9 @@ Function,+,furi_hal_bt_lock_core2,void,
 Function,+,furi_hal_bt_nvm_sram_sem_acquire,void,
 Function,+,furi_hal_bt_nvm_sram_sem_release,void,
 Function,+,furi_hal_bt_reinit,void,
+Function,+,furi_hal_bt_scan_is_active,_Bool,
+Function,+,furi_hal_bt_scan_start,_Bool,"const GapScanParams*, GapScanCallback, void*"
+Function,+,furi_hal_bt_scan_stop,void,
 Function,+,furi_hal_bt_set_key_storage_change_callback,void,"BleGlueKeyStorageChangedCallback, void*"
 Function,+,furi_hal_bt_start_advertising,void,
 Function,+,furi_hal_bt_start_app,FuriHalBleProfileBase*,"const FuriHalBleProfileTemplate*, FuriHalBleProfileParams, const GapRootSecurityKeys*, GapEventCallback, void*"
@@ -2122,6 +2138,21 @@ Function,-,gamma,double,double
 Function,-,gamma_r,double,"double, int*"
 Function,-,gammaf,float,float
 Function,-,gammaf_r,float,"float, int*"
+Function,-,gap_central_connect,_Bool,"GapAddressType, const uint8_t*"
+Function,-,gap_central_connect_cancel,_Bool,
+Function,-,gap_central_disconnect,_Bool,uint16_t
+Function,-,gap_central_discover_characteristics,_Bool,"uint16_t, uint16_t, uint16_t"
+Function,-,gap_central_discover_descriptors,_Bool,"uint16_t, uint16_t, uint16_t"
+Function,-,gap_central_discover_services,_Bool,uint16_t
+Function,-,gap_central_exchange_mtu,_Bool,uint16_t
+Function,-,gap_central_init,void,
+Function,-,gap_central_is_supported,_Bool,
+Function,-,gap_central_process_event,_Bool,void*
+Function,-,gap_central_read,_Bool,"uint16_t, uint16_t"
+Function,-,gap_central_reset,void,
+Function,-,gap_central_set_callback,void,"GapCentralEventCallback, void*"
+Function,-,gap_central_subscribe,_Bool,"uint16_t, uint16_t, _Bool, _Bool"
+Function,-,gap_central_write,_Bool,"uint16_t, uint16_t, const uint8_t*, uint8_t, _Bool"
 Function,-,gap_emit_ble_beacon_status_event,void,_Bool
 Function,-,gap_extra_beacon_get_config,const GapExtraBeaconConfig*,
 Function,-,gap_extra_beacon_get_data,uint8_t,uint8_t*
@@ -2133,6 +2164,9 @@ Function,-,gap_extra_beacon_start,_Bool,
 Function,-,gap_extra_beacon_stop,_Bool,
 Function,-,gap_get_state,GapState,
 Function,-,gap_init,_Bool,"GapConfig*, const GapRootSecurityKeys*, GapEventCallback, void*"
+Function,-,gap_scan_is_active,_Bool,
+Function,-,gap_scan_start,_Bool,"const GapScanParams*, GapScanCallback, void*"
+Function,-,gap_scan_stop,void,
 Function,-,gap_start_advertising,void,
 Function,-,gap_stop_advertising,void,
 Function,-,gap_thread_stop,void,
