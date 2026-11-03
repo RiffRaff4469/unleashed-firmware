@@ -1,9 +1,12 @@
 App(
     appid="system_settings",
     name="System",
-    apptype=FlipperAppType.SETTINGS,
+    # Loaded from SD so the firmware fits below the full BLE stack
+    apptype=FlipperAppType.EXTSETTINGS,
     entry_point="system_settings_app",
     requires=["gui", "locale"],
     stack_size=1 * 1024,
     order=30,
+    fap_libs=["assets"],
+    fap_category="assets",
 )
