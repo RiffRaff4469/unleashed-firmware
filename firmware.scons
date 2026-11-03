@@ -245,6 +245,25 @@ AddPostAction(
 )
 
 fwdfu = fwenv["FW_DFU"] = fwenv.DFUBuilder("${FIRMWARE_BUILD_CFG}")
+# DFU is what gets flashed and packaged: refuse it if it would overlap the radio stack.
+# The updater runs from RAM and has no flash footprint to check.
+if not fwenv["RAM_EXEC"]:
+    AddPostAction(
+        fwdfu,
+        Action(
+            [
+                [
+                    "@${PYTHON3}",
+                    "${BIN_SIZE_SCRIPT}",
+                    "free",
+                    "${FW_ELF}",
+                    "--copro-bin",
+                    "${ROOT_DIR.abspath}/${COPRO_STACK_BIN_DIR}/${COPRO_STACK_BIN}",
+                    "--strict",
+                ]
+            ]
+        ),
+    )
 Alias(fwenv["FIRMWARE_BUILD_CFG"] + "_dfu", fwdfu)
 
 fwdump = fwenv.ObjDump("${FIRMWARE_BUILD_CFG}")

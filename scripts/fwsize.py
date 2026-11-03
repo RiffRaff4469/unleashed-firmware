@@ -36,6 +36,11 @@ class Main(App):
             default=None,
             help="Core2 radio stack .bin (default: COPRO_STACK_BIN from fbt_options)",
         )
+        self.parser_free.add_argument(
+            "--strict",
+            action="store_true",
+            help="Fail if the firmware overlaps the core2 radio stack region",
+        )
         self.parser_free.set_defaults(func=self.process_free)
 
     def _get_elf_sections(self, elfname):
@@ -128,6 +133,14 @@ class Main(App):
             with open(step_summary, "a") as file:
                 file.write(f"- {report}\n")
 
+        if self.args.strict and free < 0:
+            print(
+                fg.red(
+                    f"Firmware overlaps core2 radio stack by {-free} bytes, "
+                    "it cannot be installed with this stack"
+                )
+            )
+            return 1
         return 0
 
 
